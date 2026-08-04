@@ -1,0 +1,59 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-[#000000] text-white antialiased min-h-screen selection:bg-white/20;
+  }
+}
+
+/* =========================================================
+   CLERK OVERRIDES: THE NUCLEAR OPTION
+   Forces all React Portals to render with solid backgrounds
+========================================================= */
+
+/* 1. The Backdrop: Makes everything behind the modal pitch black with a blur */
+.cl-modalBackdrop {
+  background-color: rgba(0, 0, 0, 0.95) !important;
+  backdrop-filter: blur(10px) !important;
+  z-index: 9998 !important;
+}
+
+/* 2. The Main Cards: Forces all popovers and modals to be solid dark grey */
+.cl-card,
+.cl-cardBox,
+.cl-userButtonPopoverCard,
+.cl-userProfile-root {
+  background-color: #050505 !important;
+  background: #050505 !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  z-index: 9999 !important;
+}
+
+/* 3. Internal Scroll Areas: Stops the text from bleeding through the middle */
+.cl-pageScrollBox,
+.cl-scrollBox,
+.cl-navbar,
+.cl-profileSection__profile,
+.cl-profileSection__security,
+.cl-profileSectionContent {
+  background-color: #050505 !important;
+  background: #050505 !important;
+}
+
+/* 4. Text & Buttons */
+.cl-headerTitle,
+.cl-profileSectionTitleText {
+  color: #ffffff !important;
+}
+.cl-headerSubtitle,
+.cl-profileSectionContent {
+  color: #a3a3a3 !important;
+}
+.cl-navbarButton {
+  color: #d4d4d4 !important;
+}
+.cl-navbarButton:hover {
+  background-color: rgba(255, 255, 255, 0.05) !important;
+}

@@ -1,0 +1,56 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// The Asset model tracks every high-res file in your vault
+model Asset {
+  id           String    @id @default(cuid())
+  userId       String    
+  folderId     String?   
+  
+  filename     String
+  originalName String
+  url          String    
+  format       String    
+  bytes        BigInt    
+  fileHash     String    
+  
+  // 🚀 ENTERPRISE AI FIELDS
+  tags         String[]  @default([])
+  colorHex     String?
+  
+  // Enterprise Soft-Delete Tracking
+  isDeleted    Boolean   @default(false)
+  deletedAt    DateTime?
+  
+  folder       Folder?   @relation(fields: [folderId], references: [id])
+  
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  @@index([userId])
+  @@index([folderId])
+}
+
+// The Folder model tracks your project organization
+model Folder {
+  id        String   @id @default(cuid())
+  userId    String   
+  name      String
+  
+  parentId  String?
+  parent    Folder?  @relation("FolderHierarchy", fields: [parentId], references: [id])
+  children  Folder[] @relation("FolderHierarchy")
+  
+  assets    Asset[]
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
+}
