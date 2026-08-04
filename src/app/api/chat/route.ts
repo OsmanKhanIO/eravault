@@ -76,7 +76,7 @@ export async function POST(req: Request) {
     const { messages } = await req.json()
     if (!messages || !Array.isArray(messages)) return new NextResponse("Invalid format", { status: 400 })
 
-    // 🚀 FIXED TYPESCRIPT: Using any[] bypasses strict structural locking
+    // 🚀 Using any[] bypasses strict structural locking
     let payloadMessages: any[] = [
       { role: "system", content: SYSTEM_PROMPT },
       ...messages.map((m: any) => ({ role: m.role, content: m.content }))
@@ -140,13 +140,13 @@ export async function POST(req: Request) {
               const folders = await db.folder.findMany({ where: { userId: user.id }, select: { name: true } })
               const assets = await db.asset.findMany({ where: { userId: user.id, isDeleted: false }, select: { bytes: true } })
               
-              const totalBytes = assets.reduce((sum, a) => sum + Number(a.bytes), 0)
+              const totalBytes = assets.reduce((sum: number, a: any) => sum + Number(a.bytes), 0)
               
               toolResult = { 
                 total_assets: assets.length,
                 total_bytes_raw: totalBytes,
                 folder_count: folders.length,
-                folder_names: folders.map(f => f.name)
+                folder_names: folders.map((f: any) => f.name)
               }
             }
 
@@ -156,10 +156,10 @@ export async function POST(req: Request) {
               const rawAssets = await db.asset.findMany({ where: { userId: user.id, isDeleted: false } })
               
               // Search through filename and tags
-              const matches = rawAssets.filter(a => 
+              const matches = rawAssets.filter((a: any) => 
                 a.filename.toLowerCase().includes(query) || 
-                (a.tags && a.tags.some(tag => tag.toLowerCase().includes(query)))
-              ).map(a => ({ name: a.filename, tags: a.tags }))
+                (a.tags && a.tags.some((tag: any) => tag.toLowerCase().includes(query)))
+              ).map((a: any) => ({ name: a.filename, tags: a.tags }))
 
               toolResult = { 
                 matches_found: matches.length,

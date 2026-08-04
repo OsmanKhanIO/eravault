@@ -50,7 +50,7 @@ export default function Footer() {
               
               {/* Direct GitHub Source Code Link */}
               <a 
-                href="https://github.com/OsmanKhan276/emdb" 
+                href="https://github.com/OsmanKhanIO/eravault" 
                 target="_blank" 
                 rel="noopener noreferrer" 
                 className="text-sm text-neutral-400 hover:text-white transition-colors flex items-center gap-2 group"

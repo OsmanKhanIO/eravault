@@ -23,7 +23,7 @@ export default async function DashboardPage() {
   })
 
   // 🚀 FIXED MAPPING: Explicitly handle Prisma's null values for the client component
-  const userAssets = rawAssets.map(asset => ({
+  const userAssets = rawAssets.map((asset: any) => ({
     ...asset,
     bytes: Number(asset.bytes),
     tags: asset.tags || [],
@@ -31,7 +31,7 @@ export default async function DashboardPage() {
   }))
 
   const totalImages = userAssets.length
-  const totalBytes = userAssets.reduce((sum, asset) => sum + asset.bytes, 0)
+  const totalBytes = userAssets.reduce((sum: number, asset: any) => sum + asset.bytes, 0)
   
   const storageGB = (totalBytes / (1024 * 1024 * 1024)).toFixed(2)
   const storageMB = (totalBytes / (1024 * 1024)).toFixed(1)

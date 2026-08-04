@@ -8,11 +8,11 @@ export default async function PublicSharedFolder({ params }: { params: Promise<{
     include: { assets: { where: { isDeleted: false }, orderBy: { createdAt: 'desc' } } }
   })
 
-  const folder = allFolders.find(f => f.name.toLowerCase().replace(/[^a-z0-9]+/g, '-') === resolvedParams.slug)
+  const folder = allFolders.find((f: any) => f.name.toLowerCase().replace(/[^a-z0-9]+/g, '-') === resolvedParams.slug)
   if (!folder) notFound()
 
   // Serialize the BigInt to a standard number for the Client Component
-  const serializedAssets = folder.assets.map(a => ({ ...a, bytes: Number(a.bytes) }))
+  const serializedAssets = folder.assets.map((a: any) => ({ ...a, bytes: Number(a.bytes) }))
 
   return <FolderClient folder={folder} assets={serializedAssets} />
 }

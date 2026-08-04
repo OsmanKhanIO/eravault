@@ -14,7 +14,7 @@ export default async function TrashPage() {
     orderBy: { updatedAt: 'desc' }
   })
   
-  const deletedAssets = rawDeletedAssets.map(a => ({ ...a, bytes: Number(a.bytes) }))
+  const deletedAssets = rawDeletedAssets.map((a: any) => ({ ...a, bytes: Number(a.bytes) }))
 
   return (
     <div className="p-4 md:p-8 lg:p-12 max-w-7xl mx-auto space-y-8 h-full flex flex-col">

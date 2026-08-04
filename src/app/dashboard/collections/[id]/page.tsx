@@ -38,8 +38,8 @@ export default async function SingleFolderPage({ params }: { params: Promise<{ i
     orderBy: { name: 'asc' }
   })
 
-  const folderAssets = rawAssets.map(asset => ({ ...asset, bytes: Number(asset.bytes) }))
-  const totalFolderBytes = folderAssets.reduce((sum, asset) => sum + asset.bytes, 0)
+  const folderAssets = rawAssets.map((asset: any) => ({ ...asset, bytes: Number(asset.bytes) }))
+  const totalFolderBytes = folderAssets.reduce((sum: number, asset: any) => sum + asset.bytes, 0)
 
   return (
     <div className="p-4 md:p-8 lg:p-12 max-w-7xl mx-auto h-full flex flex-col">

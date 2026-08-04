@@ -26,7 +26,7 @@ export default async function AdminModerationPage() {
     const clerk = await clerkClient()
     const clerkUsers = await clerk.users.getUserList({ limit: 100 })
     
-    clerkUsers.data.forEach((u) => {
+    clerkUsers.data.forEach((u: any) => {
       const firstName = u.firstName || ""
       const lastName = u.lastName || ""
       const fullName = `${firstName} ${lastName}`.trim() || u.username || "Anonymous User"
@@ -45,9 +45,9 @@ export default async function AdminModerationPage() {
   // 4. MAP DATA & CALCULATE AGGREGATED ENTERPRISE METRICS
   let totalBytes = 0
   const totalAssets = allAssetsRaw.length
-  const uniqueUsersCount = new Set(allAssetsRaw.map(a => a.userId)).size
+  const uniqueUsersCount = new Set(allAssetsRaw.map((a: any) => a.userId)).size
 
-  const sanitizedAssets = allAssetsRaw.map((asset) => {
+  const sanitizedAssets = allAssetsRaw.map((asset: any) => {
     const sizeInBytes = Number(asset.bytes)
     totalBytes += sizeInBytes
 
