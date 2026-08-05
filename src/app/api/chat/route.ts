@@ -2,6 +2,8 @@ import { NextResponse } from "next/server"
 import { currentUser } from "@clerk/nextjs/server"
 import { db } from "@/lib/db"
 
+export const runtime = 'edge'
+
 const SYSTEM_PROMPT = `You are ERA, the friendly and ultra-secure AI assistant for EraVault. 
 EraVault is a premium cloud backup platform optimized for archiving high-resolution media and digital assets.
 

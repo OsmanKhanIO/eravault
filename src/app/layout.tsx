@@ -10,8 +10,10 @@ const plusJakarta = Plus_Jakarta_Sans({
   display: 'swap',
 })
 
+export const runtime = 'edge'
+
 // Define base URL for canonical links and OpenGraph card resolution
-const siteUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://eravault.vercel.app'
+const siteUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://eravault.pages.dev'
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),

@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@clerk/nextjs/server'
 import { db } from '@/lib/db'
 
+export const runtime = 'edge'
+
 // RENAME FOLDER
 export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {

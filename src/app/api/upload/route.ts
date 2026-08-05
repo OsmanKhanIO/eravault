@@ -2,7 +2,8 @@ import { NextResponse } from "next/server"
 import { currentUser } from "@clerk/nextjs/server"
 import { db } from "@/lib/db"
 import { GoogleGenerativeAI } from "@google/generative-ai"
-import crypto from "crypto"
+
+export const runtime = 'edge'
 
 export async function POST(req: Request) {
   try {
@@ -29,7 +30,11 @@ export async function POST(req: Request) {
     const bytes = await file.arrayBuffer()
     const buffer = Buffer.from(bytes)
     const base64Image = buffer.toString("base64")
-    const fileHash = crypto.createHash('sha256').update(buffer).digest('hex')
+
+    // 🚀 EDGE-SAFE SHA-256 HASHING (Web Crypto API)
+    const hashBuffer = await crypto.subtle.digest('SHA-256', bytes)
+    const hashArray = Array.from(new Uint8Array(hashBuffer))
+    const fileHash = hashArray.map(b => b.toString(16).padStart(2, '0')).join('')
 
     let smartFilename = file.name
     let aiTags: string[] = []

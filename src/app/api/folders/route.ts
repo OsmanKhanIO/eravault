@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@clerk/nextjs/server'
 import { db } from '@/lib/db'
 
+export const runtime = 'edge'
+
 export async function POST(req: NextRequest) {
   try {
     // 1. Enterprise Security Check

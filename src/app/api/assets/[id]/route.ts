@@ -2,6 +2,8 @@ import { NextResponse } from "next/server"
 import { db } from "@/lib/db"
 import { currentUser } from "@clerk/nextjs/server"
 
+export const runtime = 'edge'
+
 export async function PATCH(
   req: Request,
   { params }: { params: Promise<{ id: string }> }
