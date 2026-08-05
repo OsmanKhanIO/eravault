@@ -54,7 +54,7 @@ export default function Header() {
             AI Engine
           </Link>
           <a 
-            href="https://github.com/OsmanKhan276/emdb" 
+            href="https://github.com/OsmanKhanIO/eravault" 
             target="_blank" 
             rel="noopener noreferrer" 
             className="text-[13px] font-medium text-neutral-400 hover:text-white transition-colors tracking-wide flex items-center gap-1.5"

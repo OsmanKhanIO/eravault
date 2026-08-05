@@ -63,7 +63,7 @@ export default function Footer() {
 
               {/* Creator Portfolio Link */}
               <a 
-                href="https://github.com/OsmanKhan276" 
+                href="https://github.com/OsmanKhanIO" 
                 target="_blank" 
                 rel="noopener noreferrer" 
                 className="text-sm text-neutral-400 hover:text-white transition-colors flex items-center gap-2 group"
