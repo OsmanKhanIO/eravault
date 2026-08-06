@@ -1,10 +1,10 @@
 import { neonConfig } from '@neondatabase/serverless'
 import { PrismaNeon } from '@prisma/adapter-neon'
 import { PrismaClient } from '@prisma/client'
-import ws from 'ws'
 
-// Enable WebSockets for Neon in Node and Cloudflare Edge environments
-neonConfig.webSocketConstructor = ws
+// 🚀 Instruct Neon to use stateless HTTP fetch instead of WebSockets on Cloudflare Edge.
+// This prevents Edge Workers from severing open sockets and eliminates "Connection closed" crashes.
+neonConfig.poolQueryViaFetch = true
 
 const connectionString = `${process.env.DATABASE_URL}`
 const adapter = new PrismaNeon({ connectionString })
