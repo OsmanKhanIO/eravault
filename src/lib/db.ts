@@ -1,7 +1,16 @@
+import { neonConfig } from '@neondatabase/serverless'
+import { PrismaNeon } from '@prisma/adapter-neon'
 import { PrismaClient } from '@prisma/client'
+import ws from 'ws'
+
+// Enable WebSockets for Neon in Node and Cloudflare Edge environments
+neonConfig.webSocketConstructor = ws
+
+const connectionString = `${process.env.DATABASE_URL}`
+const adapter = new PrismaNeon({ connectionString })
 
 const prismaClientSingleton = () => {
-  return new PrismaClient()
+  return new PrismaClient({ adapter })
 }
 
 type PrismaClientSingleton = ReturnType<typeof prismaClientSingleton>
