@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@clerk/nextjs/server'
 import { db } from '@/lib/db'
+import { revalidatePath } from 'next/cache'
 
 export const runtime = 'edge'
 
@@ -27,6 +28,10 @@ export async function POST(req: NextRequest) {
         name,
       }
     })
+
+    // 🚀 FORCE CLOUDFLARE EDGE TO PURGE STALE HTML CACHE
+    revalidatePath("/dashboard")
+    revalidatePath("/dashboard/collections")
 
     return NextResponse.json(folder)
 

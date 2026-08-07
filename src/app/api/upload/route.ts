@@ -2,6 +2,7 @@ import { NextResponse } from "next/server"
 import { currentUser } from "@clerk/nextjs/server"
 import { db } from "@/lib/db"
 import { GoogleGenerativeAI } from "@google/generative-ai"
+import { revalidatePath } from "next/cache"
 
 export const runtime = 'edge'
 
@@ -22,9 +23,9 @@ export async function POST(req: Request) {
     }
 
     // Restrict size to 32MB (Imgbb's maximum limit)
-    const MAX_FILE_SIZE = 32 * 1024 * 1024; // 32MB in bytes
+    const MAX_FILE_SIZE = 32 * 1024 * 1024 // 32MB in bytes
     if (file.size > MAX_FILE_SIZE) {
-      return new NextResponse(`File too large. Maximum size is 32MB.`, { status: 400 })
+      return new NextResponse("File too large. Maximum size is 32MB.", { status: 400 })
     }
 
     const bytes = await file.arrayBuffer()
@@ -64,7 +65,7 @@ export async function POST(req: Request) {
       }`
 
       let responseText = ""
-      let success = false;
+      let success = false
 
       // ⚖️ THE GOOGLE LOAD BALANCER & FALLBACK CASCADE
       const apiKey = process.env.GEMINI_API_KEY || ""
@@ -73,7 +74,7 @@ export async function POST(req: Request) {
 
       // 1. Primary Network (Google Gemini)
       for (const modelName of googleModels) {
-        if (success) break;
+        if (success) break
         try {
           console.log(`[AI] Routing to Primary Network -> ${modelName}...`)
           const model = genAI.getGenerativeModel({ model: modelName })
@@ -82,14 +83,14 @@ export async function POST(req: Request) {
             { inlineData: { data: base64Image, mimeType } }
           ])
           responseText = result.response.text()
-          success = true;
+          success = true
           console.log(`[AI] Success: Served via ${modelName}.`)
         } catch (error: any) {
           const errMsg = error.message || ""
           if (errMsg.includes("limit: 0")) {
-            console.error(`\n🚨 [CRITICAL GOOGLE BILLING ERROR] 🚨`)
-            console.error(`You are using a Google Cloud AQ. key. Replace it with a free AIza key from aistudio.google.com.`)
-            console.error(`🚨 -------------------------------- 🚨\n`)
+            console.error("\n🚨 [CRITICAL GOOGLE BILLING ERROR] 🚨")
+            console.error("You are using a Google Cloud AQ. key. Replace it with a free AIza key from aistudio.google.com.")
+            console.error("🚨 -------------------------------- 🚨\n")
           }
           console.warn(`[AI] ${modelName} rejected request. Load balancing...`)
         }
@@ -97,7 +98,7 @@ export async function POST(req: Request) {
 
       // 2. Secondary Network (Cloudflare LLaVA Fallback)
       if (!success) {
-        console.warn(`[AI] Google Primary Network offline. Deploying Cloudflare Fallback...`)
+        console.warn("[AI] Google Primary Network offline. Deploying Cloudflare Fallback...")
         
         const cfAccountId = process.env.CLOUDFLARE_ACCOUNT_ID
         const cfApiToken = process.env.CLOUDFLARE_API_TOKEN
@@ -183,6 +184,10 @@ export async function POST(req: Request) {
         colorHex: dominantColor
       }
     })
+
+    // 🚀 PURGE STALE EDGE CACHE SO THE UI UPDATES IMMEDIATELY
+    revalidatePath("/dashboard")
+    revalidatePath("/dashboard/collections")
 
     return NextResponse.json({ ...asset, bytes: Number(asset.bytes) })
 

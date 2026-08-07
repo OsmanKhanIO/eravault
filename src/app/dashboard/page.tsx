@@ -3,6 +3,9 @@ import { redirect } from "next/navigation"
 import { db } from "@/lib/db"
 import VaultTable from "@/components/dashboard/vault-table"
 
+// 🚀 PREVENT CLOUDFLARE EDGE FROM SERVING STALE CACHED DATA
+export const dynamic = "force-dynamic"
+
 export default async function DashboardPage() {
   const user = await currentUser()
   if (!user) {
@@ -18,7 +21,7 @@ export default async function DashboardPage() {
   // 2. Fetch Folders for the Move Modal
   const folders = await db.folder.findMany({
     where: { userId: user.id },
-    select: { id: true, name: true }, // We only need id and name for the dropdown
+    select: { id: true, name: true },
     orderBy: { name: 'asc' }
   })
 

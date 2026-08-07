@@ -5,6 +5,9 @@ import { Folder as FolderIcon, LayoutGrid } from "lucide-react"
 import VaultTable from "@/components/dashboard/vault-table"
 import FolderGrid from "@/components/dashboard/folder-grid"
 
+// 🚀 PREVENT CLOUDFLARE EDGE FROM SERVING STALE CACHED DATA
+export const dynamic = "force-dynamic"
+
 export default async function CollectionsPage() {
   const user = await currentUser()
   if (!user) redirect('/sign-in')
@@ -29,7 +32,7 @@ export default async function CollectionsPage() {
     filename: a.filename,
     url: a.url,
     format: a.format,
-    bytes: Number(a.bytes), // Convert BigInt to Number for the client
+    bytes: Number(a.bytes),
     createdAt: a.createdAt,
     folderId: a.folderId,
     tags: a.tags || [],
