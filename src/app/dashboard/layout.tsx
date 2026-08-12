@@ -5,7 +5,7 @@ import { UserButton, SignOutButton } from "@clerk/nextjs"
 import { dark } from "@clerk/themes"
 import Link from "next/link"
 import { usePathname, useRouter } from "next/navigation"
-import { Home, LogOut, Upload, HardDrive, Menu, X, Folder, Plus, Trash2, Loader2, CheckCircle2, XCircle, Minus, ChevronUp, FileImage } from "lucide-react"
+import { Home, LogOut, Upload, HardDrive, Menu, X, Folder, Plus, Trash2, Loader2, CheckCircle2, XCircle, Minus, ChevronUp, FileImage, AlertTriangle } from "lucide-react"
 
 // 🚀 IMPORT THE ASK ERA COMPONENT
 import AskEra from "@/components/dashboard/ask-era"
@@ -112,20 +112,24 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     return `${Math.floor(seconds / 60)}m ${Math.ceil(seconds % 60)}s left`
   }
 
+  // 1. THE FRONTEND BOUNCER
   const processFiles = (files: FileList | File[]) => {
     const fileArray = Array.from(files)
     if (fileArray.length === 0) return
 
-    // 🛡️ THE FRONTEND BOUNCER (Now using Custom Toast instead of Alert)
     const validFiles: File[] = []
+    const validExtensions = ['jpg', 'jpeg', 'png', 'webp', 'gif', 'heic']
+
     for (const file of fileArray) {
-      if (!file.type.startsWith("image/")) {
-        setToast(`Upload Rejected: "${file.name}" is an unsupported format.`)
+      const ext = file.name.split('.').pop()?.toLowerCase() || ''
+      
+      if (!validExtensions.includes(ext) || !file.type.startsWith("image/")) {
+        setToast(`Rejected: "${file.name}" (RAW/Video formats not supported).`)
         setTimeout(() => setToast(null), 4000)
         continue 
       }
       if (file.size > 32 * 1024 * 1024) {
-        setToast(`Upload Rejected: "${file.name}" exceeds the 32MB limit.`)
+        setToast(`Rejected: "${file.name}" exceeds 32MB limit.`)
         setTimeout(() => setToast(null), 4000)
         continue 
       }
@@ -143,18 +147,40 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       return { id, file, filename: file.name, progress: 0, status: 'pending', speed: 0, eta: 0, totalBytes: file.size, uploadedBytes: 0 }
     })
 
-    setUploadTasks(prev => [...prev, ...newTasks])
+    setUploadTasks(prev => {
+      const updated = [...prev, ...newTasks]
+      // Start the queue manager immediately after adding tasks
+      setTimeout(processQueue, 50)
+      return updated
+    })
+    
     setIsUploadPanelOpen(true)
     setIsUploadPanelMinimized(false)
 
-    if (pathname !== '/dashboard/collections') {
-      router.push('/dashboard/collections')
-    }
-
-    newTasks.forEach(task => uploadFileXHR(task))
+    if (pathname !== '/dashboard/collections') router.push('/dashboard/collections')
     if (fileInputRef.current) fileInputRef.current.value = ''
   }
 
+  // 2. THE CONCURRENCY QUEUE MANAGER (Max 2 simultaneous uploads)
+  const processQueue = () => {
+    setUploadTasks(prev => {
+      const uploadingCount = prev.filter(t => t.status === 'uploading').length
+      if (uploadingCount >= 2) return prev // Limit reached, do not start more
+
+      const pending = prev.filter(t => t.status === 'pending')
+      if (pending.length === 0) return prev
+
+      const toStart = pending.slice(0, 2 - uploadingCount)
+      toStart.forEach(task => {
+        setTimeout(() => uploadFileXHR(task), 0)
+      })
+
+      // Mark the ones we just started as 'uploading' so the queue doesn't grab them again
+      return prev.map(t => toStart.find(s => s.id === t.id) ? { ...t, status: 'uploading' } : t)
+    })
+  }
+
+  // 3. THE XHR WORKER
   const uploadFileXHR = (task: UploadTask) => {
     const formData = new FormData()
     formData.append('file', task.file) 
@@ -175,7 +201,6 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           metrics.speed = metrics.speed === 0 ? currentSpeed : (metrics.speed * 0.8 + currentSpeed * 0.2)
           metrics.lastUpdate = now
           metrics.lastLoaded = e.loaded
-
           const eta = metrics.speed > 0 ? (e.total - e.loaded) / metrics.speed : 0
 
           setUploadTasks(prev => prev.map(t => t.id === task.id ? {
@@ -192,14 +217,21 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       } else {
         setUploadTasks(prev => prev.map(t => t.id === task.id ? { ...t, status: 'error' } : t))
       }
+      processQueue() // Trigger next in line
     }
 
-    xhr.onerror = () => setUploadTasks(prev => prev.map(t => t.id === task.id ? { ...t, status: 'error' } : t))
+    xhr.onerror = () => {
+      setUploadTasks(prev => prev.map(t => t.id === task.id ? { ...t, status: 'error' } : t))
+      processQueue() // Trigger next in line
+    }
+    
     xhr.send(formData)
   }
 
+  // 4. ACCURATE UI METRICS
   const activeUploads = uploadTasks.filter(t => t.status === 'uploading' || t.status === 'pending').length
   const totalCompleted = uploadTasks.filter(t => t.status === 'success').length
+  const totalFailed = uploadTasks.filter(t => t.status === 'error').length
   const isComplete = uploadTasks.length > 0 && activeUploads === 0
 
   return (
@@ -327,9 +359,15 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         <div className="fixed bottom-4 right-4 md:bottom-8 md:right-8 w-[340px] md:w-[400px] bg-[#0a0a0a] border border-white/10 rounded-xl shadow-2xl z-[9999] flex flex-col overflow-hidden animate-in slide-in-from-bottom-10 duration-300">
           <div className="bg-[#111] border-b border-white/10 px-4 py-3 flex items-center justify-between cursor-pointer" onClick={() => setIsUploadPanelMinimized(!isUploadPanelMinimized)}>
             <div className="flex items-center gap-3">
-              {isComplete ? <CheckCircle2 className="w-5 h-5 text-green-500" /> : <Loader2 className="w-5 h-5 text-white animate-spin" />}
+              {isComplete ? (
+                totalFailed > 0 ? <AlertTriangle className="w-5 h-5 text-amber-500" /> : <CheckCircle2 className="w-5 h-5 text-green-500" />
+              ) : (
+                <Loader2 className="w-5 h-5 text-white animate-spin" />
+              )}
               <span className="text-sm font-medium text-white">
-                {isComplete ? `${totalCompleted} uploads complete` : `Uploading ${activeUploads} item${activeUploads > 1 ? 's' : ''}...`}
+                {isComplete 
+                  ? (totalFailed > 0 ? `${totalCompleted} successful, ${totalFailed} failed` : `${totalCompleted} uploads complete`) 
+                  : `Uploading ${activeUploads} item${activeUploads > 1 ? 's' : ''}...`}
               </span>
             </div>
             <div className="flex items-center gap-1">
@@ -362,6 +400,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                       <span className="text-[10px] text-neutral-500">{formatBytes(task.uploadedBytes)} / {formatBytes(task.totalBytes)}</span>
                       {task.status === 'uploading' && task.progress > 0 && <span className="text-[10px] text-neutral-400 font-mono">{formatETA(task.eta)} • {formatBytes(task.speed)}/s</span>}
                       {task.status === 'pending' && <span className="text-[10px] text-neutral-500">Queued...</span>}
+                      {task.status === 'error' && <span className="text-[10px] text-red-500">Failed</span>}
                     </div>
                   </div>
                 </div>

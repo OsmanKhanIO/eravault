@@ -17,9 +17,10 @@ export async function POST(req: Request) {
 
     if (!file) return new NextResponse("No file provided", { status: 400 })
 
-    // 🛡️ THE ERAVAULT BOUNCER: Strict Image & Size Constraints
-    if (!file.type.startsWith("image/")) {
-      return new NextResponse("Unsupported file type. EraVault currently strictly supports image formats.", { status: 400 })
+    // 🛡️ THE ERAVAULT BOUNCER: Strict Image & Size Constraints (Prevents 503 Crashes)
+    const validMimes = ['image/jpeg', 'image/png', 'image/webp', 'image/gif', 'image/heic']
+    if (!validMimes.includes(file.type)) {
+      return new NextResponse("Unsupported format. EraVault strictly accepts standard web images (JPG, PNG, WEBP).", { status: 400 })
     }
 
     // Restrict size to 32MB (Imgbb's maximum limit)
@@ -49,8 +50,6 @@ export async function POST(req: Request) {
     try {
       console.log(`[AI] Starting Dynamic Vision Analysis for: ${file.name}...`)
       
-      // 🧠 THE OMNI-PROMPT v2.0
-      // Explicitly forbids guessing to guarantee 99% accuracy for film assets.
       const prompt = `You are an elite, universal computer vision AI for a premium archiving vault. Your mandate is 100% factual accuracy. DO NOT GUESS.
 
       Perform a rigorous visual scan:
@@ -168,7 +167,6 @@ export async function POST(req: Request) {
     const imgbbData = await imgbbRes.json()
     
     if (!imgbbRes.ok || !imgbbData.success) {
-      // 🚀 If ImgBB rejects it, this will print the exact reason to your browser's Network tab
       const errorMessage = imgbbData?.error?.message || "Unknown ImgBB Error"
       console.error("[IMGBB_ERROR]", errorMessage)
       return new NextResponse(`Storage Upload Failed: ${errorMessage}`, { status: 500 })

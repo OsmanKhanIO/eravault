@@ -18,13 +18,20 @@
 
 **Zero-compression storage. Bit-for-bit preservation. AI that tags your media before you even ask.**
 
-[Live Demo](#) · [Documentation](#-table-of-contents) · [Report Bug](#-troubleshooting) · [Request Feature](#-roadmap)
+[Documentation](#-table-of-contents) · [Report Bug](#-troubleshooting) · [Request Feature](#-roadmap)
 
 <br/>
 
-<img src="docs/screenshots/dashboard-dark.png" alt="EraVault Dashboard Screenshot" width="800" />
-
-<sub>Dashboard · Collections · AI Tagging Console (placeholder screenshots — replace with production captures)</sub>
+<p align="center">
+  <img src="public/screenshots/admin-dashboard.png" width="800" alt="EraVault God Mode Admin Dashboard" />
+</p>
+<p align="center">
+  <img src="public/screenshots/dashboard.png" width="800" alt="EraVault Main Vault View" />
+</p>
+<p align="center">
+  <img src="public/screenshots/era-intelligence.png" width="400" alt="AI Tagging Engine extracting metadata" />
+  <img src="public/screenshots/upload-queue.png" width="400" alt="Enterprise Upload Queue processing files" />
+</p>
 
 </div>
 
@@ -992,7 +999,7 @@ Released under the **MIT License**. See [`LICENSE`](./LICENSE) for full terms.
 <p><i>Engineered with precision by <b>Osman Ahmed Khan</b></i></p>
 
 <a href="https://github.com/OsmanKhanIO">GitHub Profile</a> •
-<a href="https://yourportfolio.com">Portfolio</a>
+<a href="https://osmankhan.pages.dev">Portfolio</a>
 
 <br><br>
 
