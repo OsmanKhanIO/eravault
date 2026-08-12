@@ -30,6 +30,8 @@ export async function POST(req: Request) {
 
     const bytes = await file.arrayBuffer()
     const buffer = Buffer.from(bytes)
+    
+    // We only use base64 for Google Gemini vision analysis.
     const base64Image = buffer.toString("base64")
 
     // 🚀 EDGE-SAFE SHA-256 HASHING (Web Crypto API)
@@ -152,9 +154,11 @@ export async function POST(req: Request) {
       console.error("====================================================\n")
     }
 
-    // 3. ☁️ UPLOAD TO IMGBB
+    // 3. ☁️ UPLOAD TO IMGBB (Optimized for Edge Memory)
     const imgbbForm = new FormData()
-    imgbbForm.append("image", base64Image)
+    
+    // Pass the raw binary File object directly to avoid Edge Worker memory limits
+    imgbbForm.append("image", file) 
     
     const imgbbRes = await fetch(`https://api.imgbb.com/1/upload?key=${process.env.IMGBB_API_KEY}`, { 
       method: "POST", 
@@ -164,7 +168,10 @@ export async function POST(req: Request) {
     const imgbbData = await imgbbRes.json()
     
     if (!imgbbRes.ok || !imgbbData.success) {
-      return new NextResponse("Storage Upload Failed", { status: 500 })
+      // 🚀 If ImgBB rejects it, this will print the exact reason to your browser's Network tab
+      const errorMessage = imgbbData?.error?.message || "Unknown ImgBB Error"
+      console.error("[IMGBB_ERROR]", errorMessage)
+      return new NextResponse(`Storage Upload Failed: ${errorMessage}`, { status: 500 })
     }
     
     const fileUrl = imgbbData.data.url
